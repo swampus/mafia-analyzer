@@ -1,5 +1,5 @@
 {
-  "name": "my-app",
+  "name": "mafia-analyzer",
   "version": "0.1.0",
   "private": true,
   "scripts": {
@@ -8,6 +8,9 @@
     "start": "next start",
     "lint": "next lint"
   },
+  "engines": {
+    "node": ">=20"
+   },
   "dependencies": {
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
