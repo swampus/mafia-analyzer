@@ -10,14 +10,16 @@
   },
   "engines": {
     "node": ">=20"
-   },
+  },
   "dependencies": {
     "@types/node": "20.6.2",
     "@types/react": "18.2.22",
     "@types/react-dom": "18.2.7",
+    "@upstash/redis": "^1.36.2",
     "autoprefixer": "10.4.15",
     "eslint": "8.49.0",
     "eslint-config-next": "13.5.1",
+    "nanoid": "^5.1.6",
     "next": "^14.1.0",
     "postcss": "8.4.30",
     "react": "18.2.0",
