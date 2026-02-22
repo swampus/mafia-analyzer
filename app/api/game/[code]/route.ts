@@ -9,11 +9,12 @@ export async function GET(
 
   const code = params.code
 
-  const ip = req.headers.get("x-forwarded-for") ?? "local"
+  const ip =
+    req.headers.get("x-forwarded-for")?.split(",")[0] ?? "local"
 
-     if(!rateLimit("create:"+ip,10,60000)){
-       return NextResponse.json({error:"Too many games"}, {status:429})
-     }
+  if(!rateLimit("view:"+params.code+":"+ip,120,60000)){
+    return NextResponse.json({error:"Too many requests"},{status:429})
+  }
 
   const game = await loadGame(params.code)
 
