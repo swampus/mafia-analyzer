@@ -11,7 +11,7 @@ export async function POST(req: Request, { params }: any) {
   const auth = requireAdmin(req, game)
   if (auth) return auth
 
-  if(!(await rateLimit("join:"+code,50,60))){
+  if(!(await rateLimit("join:"+params.code,50,60))){
     return NextResponse.json({error:"Too many joins"}, {status:429})
   }
 
