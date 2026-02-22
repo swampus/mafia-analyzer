@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server"
 import { loadGame, saveGame } from "@/src/lib/gameStore"
 import { requireAdmin } from "@/src/lib/admin"
+import { rateLimit } from "@/src/lib/rateLimit"
 
 export async function POST(req: Request, { params }: any) {
 
