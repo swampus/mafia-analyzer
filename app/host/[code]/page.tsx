@@ -3,7 +3,6 @@
 import { useParams, useSearchParams } from "next/navigation"
 import { useEffect, useMemo, useState } from "react"
 import { ROLES } from "@/src/data/roles"
-import { rateLimit } from "@/src/lib/rateLimit"
 
 function VoteBox({ game, voter, code, adminFetch, load, activeRound }: any) {
 
@@ -114,7 +113,13 @@ const adminCode =
 
 async function addPlayer(){
 
-  if(!name.trim()) return
+  const cleanName = name.trim()
+
+  if(!cleanName) return alert("Enter name")
+
+  if(cleanName.length > 30){
+    return alert("Name too long")
+  }
 
   await fetch(`/api/game/${code}/player`,{
     method:"POST",
@@ -122,7 +127,7 @@ async function addPlayer(){
       "Content-Type":"application/json",
       "x-admin-code": adminCode
     },
-    body: JSON.stringify({ name })
+    body: JSON.stringify({ name: cleanName })
   })
 
   setName("")
