@@ -32,7 +32,8 @@ export async function GET(
       seat: p.seat,
       alive: p.alive,
       note: p.note,
-      roleRevealed: p.roleRevealed
+      roleRevealed: p.roleRevealed,
+      role: p.role
     }))
 
     return NextResponse.json({
