@@ -26,7 +26,7 @@ export async function GET(
   const publicVotes = buildPublicVotes(game)
   const publicGraph = buildPublicVoteGraph(game)
 
-    const safePlayers = game.players.map(p => ({
+    const safePlayers = (game.players ?? []).map((p:any) => ({
       id: p.id,
       name: p.name,
       seat: p.seat,
@@ -35,10 +35,13 @@ export async function GET(
       roleRevealed: p.roleRevealed
     }))
 
-    return NextResponse.json({
-      ...game,
-      players: safePlayers,
-      publicVotes,
-      publicGraph
-    })
+   return NextResponse.json({
+     id: game.id,
+     phase: game.phase,
+     round: game.round,
+     status: game.status,
+     players: safePlayers,
+     publicVotes,
+     publicGraph
+   })
 }
