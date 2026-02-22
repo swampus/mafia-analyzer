@@ -14,12 +14,13 @@ export async function GET(){
 export async function POST(req:Request){
 
   // ✅ get IP
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0] ??
-    "local"
+    const ip =
+     req.headers.get("x-real-ip")
+     ?? req.headers.get("x-forwarded-for")?.split(",")[0]
+     ?? "unknown"
 
   // ✅ RATE LIMIT (anti bot)
-  if(!rateLimit("create:"+ip,10,60000)){
+  if(!(await rateLimit("create:"+ip,10,60000))){
     return NextResponse.json(
       {error:"Too many games created"},
       {status:429}

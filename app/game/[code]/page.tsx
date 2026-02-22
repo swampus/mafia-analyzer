@@ -1,16 +1,43 @@
 "use client"
 
 import { useParams } from "next/navigation"
-import { useEffect,useState } from "react"
+import { useEffect, useState, useRef } from "react"
+import { Network } from "vis-network"
 
 export default function GamePage(){
 
   const {code}=useParams()
+
+  const [roundView,setRoundView]=useState<number|null>(null)
   const [game,setGame]=useState<any>(null)
+
+  // 🔥 локальная история голосов — НЕ ТЕРЯЕТСЯ
+  const [allVotes,setAllVotes]=useState<any[]>([])
 
   async function load(){
     const res=await fetch(`/api/game/${code}`)
-    if(res.ok) setGame(await res.json())
+    if(res.ok){
+
+      const g=await res.json()
+      setGame(g)
+      setRoundView(prev=>prev ?? g.round ?? 1)
+
+      // 🔥 объединяем историю голосов
+      setAllVotes(prev=>{
+        const merged=[...prev]
+
+        for(const v of (g.publicVotes ?? [])){
+          const exists=merged.some(x =>
+            x.round===v.round &&
+            x.voter.id===v.voter.id &&
+            JSON.stringify(x.targets)===JSON.stringify(v.targets)
+          )
+          if(!exists) merged.push(v)
+        }
+
+        return merged
+      })
+    }
   }
 
   useEffect(()=>{
@@ -21,32 +48,19 @@ export default function GamePage(){
 
   if(!game) return <div className="p-6">Loading...</div>
 
+  const activeRound = roundView ?? game.round ?? 1
+  const rounds = Array.from({length:game.round ?? 1},(_,i)=>i+1)
+
   return(
 
     <main className="relative min-h-screen">
 
-      {/* GLOBAL BACKGROUND */}
+      {game.phase==="night"
+        ? <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 -z-10"/>
+        : <div className="fixed inset-0 bg-gradient-to-b from-amber-50 via-white to-amber-100 -z-10"/>
+      }
 
-      {game.phase==="night" && (
-        <div className="fixed inset-0 bg-gradient-to-b from-slate-950 via-slate-900 to-slate-950 -z-10">
-
-          {/* stars */}
-          <div className="absolute w-1 h-1 bg-white rounded-full top-10 left-10 opacity-80"/>
-          <div className="absolute w-1 h-1 bg-white rounded-full top-24 left-1/3 opacity-70"/>
-          <div className="absolute w-1 h-1 bg-white rounded-full top-40 right-20 opacity-80"/>
-          <div className="absolute w-1 h-1 bg-white rounded-full bottom-32 left-1/4 opacity-70"/>
-          <div className="absolute w-1 h-1 bg-white rounded-full bottom-16 right-1/3 opacity-80"/>
-
-        </div>
-      )}
-
-      {game.phase!=="night" && (
-        <div className="fixed inset-0 bg-gradient-to-b from-amber-50 via-white to-amber-100 -z-10"/>
-      )}
-
-      {/* CONTENT */}
-
-      <div className={`p-6 max-w-xl mx-auto transition-colors duration-700 ${
+      <div className={`p-6 max-w-xl mx-auto ${
         game.phase==="night" ? "text-slate-100" : "text-black"
       }`}>
 
@@ -57,38 +71,151 @@ export default function GamePage(){
             ? "bg-slate-800 border-slate-700"
             : "bg-white"
         }`}>
-          <span className="inline-flex items-center gap-2">
-            {game.phase==="night" ? "🌙 Night" : "☀️ Day"}
-          </span> | Round: <b>{game.round}</b>
+          {game.phase==="night" ? "🌙 Night" : "☀️ Day"} | Round: <b>{game.round}</b>
         </div>
 
-        <div className="flex flex-col gap-2">
+        {/* PLAYERS */}
+
+        <div className="flex flex-col gap-2 mb-6">
 
           {game.players?.map((p:any)=>(
-
             <div key={p.id}
               className={`border rounded-xl p-3 flex justify-between ${
                 game.phase==="night"
                   ? "bg-slate-800 border-slate-700"
                   : "bg-white"
               }`}>
-
-              <span>
-                {p.name} {p.alive ? "" : "☠️"}
-              </span>
-
-              <span className="text-gray-500 text-sm">
-                seat {p.seat ?? "?"}
-              </span>
-
+              <span>{p.name} {p.alive ? "" : "☠️"}</span>
+              <span className="text-gray-500 text-sm">seat {p.seat ?? "?"}</span>
             </div>
-
           ))}
 
         </div>
+
+        {/* ROUND BUTTONS */}
+
+        <div className="flex gap-2 mb-4 flex-wrap">
+
+          {rounds.map((r:number)=>(
+            <button
+              key={r}
+              onClick={()=>setRoundView(r)}
+              className={`px-3 py-1 rounded-lg border ${
+                r===activeRound
+                  ? "bg-blue-600 text-white"
+                  : "bg-white text-black"
+              }`}
+            >
+              Round {r}
+            </button>
+          ))}
+
+        </div>
+
+        {/* HISTORY */}
+
+        <div className={`rounded-2xl border p-4 mb-4 ${
+          game.phase==="night"
+            ? "bg-slate-800 border-slate-700"
+            : "bg-white"
+        }`}>
+
+          <h2 className="font-semibold mb-2">Votes history</h2>
+
+          {allVotes.filter(v=>v.round===activeRound).length===0 && (
+            <div className="text-sm opacity-60">No votes this round</div>
+          )}
+
+          {allVotes
+            .filter(v=>v.round===activeRound)
+            .map((v:any,i:number)=>(
+              <div key={i} className="text-sm mb-1">
+                <b>{v.voter.name}</b> → {v.targets.map((t:any)=>t.name).join(", ")}
+              </div>
+          ))}
+
+        </div>
+
+        {/* GRAPH */}
+
+        {(game.publicGraph?.nodes ?? []).length>0 && (
+
+          <div className={`rounded-2xl border p-4 ${
+            game.phase==="night"
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white"
+          }`}>
+
+            <VoteGraph game={game} votes={allVotes} round={activeRound}/>
+
+          </div>
+        )}
 
       </div>
 
     </main>
   )
+}
+
+
+function VoteGraph({game,votes,round}:{game:any,votes:any[],round:number}){
+
+  const containerRef=useRef<HTMLDivElement>(null)
+  const networkRef=useRef<any>(null)
+
+  useEffect(()=>{
+
+    if(!containerRef.current) return
+
+    const edges=(game.publicGraph.edges ?? [])
+      .filter((e:any)=>{
+        const vote=votes.find((v:any)=>
+          v.round===round &&
+          v.voter.id===e.from &&
+          v.targets.some((t:any)=>t.id===e.to)
+        )
+        return !!vote
+      })
+      .map((e:any)=>({
+        from:e.from,
+        to:e.to,
+        arrows:"to"
+      }))
+
+    const nodes=(game.publicGraph.nodes ?? []).map((n:any)=>({
+      id:n.id,
+      label:n.label,
+      color:n.alive ? "#22c55e" : "#ef4444",
+      fixed:true
+    }))
+
+    const data={nodes,edges}
+
+    const options={
+      height:"320px",
+      interaction:{
+        dragNodes:false,
+        dragView:false,
+        zoomView:false
+      },
+      physics:false
+    }
+
+    if(!networkRef.current){
+
+      networkRef.current=new Network(
+        containerRef.current,
+        data,
+        options
+      )
+
+    }else{
+
+      networkRef.current.setData(data)
+
+    }
+
+  },[game,votes,round])
+
+  return <div ref={containerRef}/>
 }

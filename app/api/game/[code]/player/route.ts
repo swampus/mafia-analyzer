@@ -23,11 +23,12 @@ export async function POST(
   }
 
   // ✅ RATE LIMIT PER IP
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0]?.trim()
-    ?? "local"
+    const ip =
+     req.headers.get("x-real-ip")
+     ?? req.headers.get("x-forwarded-for")?.split(",")[0]
+     ?? "unknown"
 
-  if(!rateLimit("join:"+params.code+":"+ip,20,60000)){
+  if(!(await rateLimit("join:"+params.code+":"+ip,20,60))){
     return NextResponse.json({error:"Too many joins"},{status:429})
   }
 

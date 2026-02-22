@@ -19,11 +19,12 @@ export async function POST(
   if(unauthorized) return unauthorized
 
   // ✅ RATE LIMIT
-  const ip =
-    req.headers.get("x-forwarded-for")?.split(",")[0] ??
-    "local"
+const ip =
+ req.headers.get("x-real-ip")
+ ?? req.headers.get("x-forwarded-for")?.split(",")[0]
+ ?? "unknown"
 
-  if(!rateLimit("vote:"+params.code+":"+ip,40,60000)){
+  if(!(await rateLimit("vote:"+params.code+":"+ip,40,60))){
     return NextResponse.json({error:"Too many votes"},{status:429})
   }
 

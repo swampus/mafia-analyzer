@@ -12,7 +12,7 @@ export async function POST(
 ) {
   const game: any = await loadGame(params.code)
 
-  if(!rateLimit("join:"+params.code,50,60000)){
+  if(!(await rateLimit("join:"+params.code,50,60))){
       return NextResponse.json({error:"Too many joins"}, {status:429})
   }
 

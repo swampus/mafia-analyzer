@@ -18,18 +18,16 @@ export async function POST(
 
   const {action}=await req.json()
 
-  if(action==="nextRound"){
+    if(action==="nextRound"){
 
-    if(game.round===0){
-      game.round=1
-      game.phase="day"
-    }else{
-      game.round+=1
-      game.phase="day"
-    }
+      if(game.round===0){
+        game.round=1
+      }else{
+        game.round+=1
+      }
 
-    game.votes=[]
-  }
+      game.phase="day"
+      }
 
   if(action==="togglePhase"){
     game.phase=game.phase==="day"?"night":"day"
