@@ -123,7 +123,7 @@ export default function HomePage() {
   )
 }
 
-function InfoCard({title,text}:{title:string,text:string}){
+function InfoCard({title,text}:{title:string,text:React.ReactNode}){
   return(
     <div className="rounded-2xl border p-5 bg-white/70 backdrop-blur shadow-sm">
       <div className="font-semibold mb-2">{title}</div>
