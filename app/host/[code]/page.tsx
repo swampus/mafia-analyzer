@@ -153,7 +153,12 @@ async function addPlayer(){
   const isSetup = game.round===0
   const isArchived = !!game.endedAt
   const maxRound=Math.max(1,...((game.votes??[]).map((v:any)=>v.round??1)))
-  const activeRound=isArchived?viewRound:game.round
+  const lastVoteRound = Math.max(
+    1,
+    ...((game.votes ?? []).map((v:any)=>v.round ?? 1))
+  )
+
+  const activeRound = isArchived ? viewRound : game.round
 
   // vote counting
   const counts:Record<string,number>={}
@@ -325,6 +330,21 @@ async function addPlayer(){
 
       </div>
 
+    <div className="flex gap-2 flex-wrap">
+
+    {Array.from({length:Math.max(game.round,1)},(_,i)=>i+1).map(r=>(
+      <button
+        key={r}
+        onClick={()=>setViewRound(r)}
+        className={`px-3 py-1 rounded border ${
+          r===activeRound?"bg-black text-white":"bg-gray-200"
+        }`}
+      >
+        Round {r}
+      </button>
+    ))}
+
+    </div>
 
       {/* FILTER */}
       <label className="flex items-center gap-2 text-sm">
@@ -390,9 +410,8 @@ async function addPlayer(){
 
         {visiblePlayers.map((p:any)=>{
 
-          const myVote=game.votes?.find(
-            (v:any)=>v.voterId===p.id && v.round===activeRound
-          )
+           const myVote =
+             game.votes?.find((v:any)=>String(v.voterId)===String(p.id) && v.round===activeRound)
 
           const voteNames =
             myVote?.targetIds?.map((id:string)=>

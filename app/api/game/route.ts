@@ -20,7 +20,7 @@ export async function POST(req:Request){
      ?? "unknown"
 
   // ✅ RATE LIMIT (anti bot)
-  if(!(await rateLimit("create:"+ip,10,60000))){
+  if(!(await rateLimit("create:"+ip,10,600))){
     return NextResponse.json(
       {error:"Too many games created"},
       {status:429}

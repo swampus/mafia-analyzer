@@ -28,7 +28,7 @@ export async function POST(
      ?? req.headers.get("x-forwarded-for")?.split(",")[0]
      ?? "unknown"
 
-  if(!(await rateLimit("join:"+params.code+":"+ip,20,60))){
+  if(!(await rateLimit("join:"+params.code+":"+ip,20,600))){
     return NextResponse.json({error:"Too many joins"},{status:429})
   }
 

@@ -35,7 +35,7 @@ export async function saveGame(code: string, game: any, ip?:string){
 
   const client = getIP(ip)
 
-  if(!(await rateLimit("save:"+code+":"+client,200,60))){
+  if(!(await rateLimit("save:"+code+":"+client,200,120))){
     const err:any = new Error("RATE_LIMIT")
     err.code="RATE_LIMIT"
     throw err

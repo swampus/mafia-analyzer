@@ -35,13 +35,10 @@ export async function GET(
       roleRevealed: p.roleRevealed
     }))
 
-   return NextResponse.json({
-     id: game.id,
-     phase: game.phase,
-     round: game.round,
-     status: game.status,
-     players: safePlayers,
-     publicVotes,
-     publicGraph
-   })
+    return NextResponse.json({
+      ...game,
+      players: safePlayers,
+      publicVotes,
+      publicGraph
+    })
 }
