@@ -6,7 +6,7 @@ import { Network } from "vis-network"
 
 export default function GamePage(){
 
-  const code = Array.isArray(params.code) ? params.code[0] : params.code
+  const {code}=useParams()
 
   const [roundView,setRoundView]=useState<number|null>(null)
   const [game,setGame]=useState<any>(null)
