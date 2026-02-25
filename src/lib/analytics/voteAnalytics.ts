@@ -36,7 +36,7 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
   const outWeight = new Map<string, number>()
   const inWeight = new Map<string, number>()
   const edgeWeight = new Map<string, number>()
-
+  const voters = players.map(p => p.id)
   // popularity map for bandwagon
   const targetPopularity = new Map<string, number>()
 
@@ -72,7 +72,6 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
     return uni === 0 ? 0 : inter / uni
   }
 
-  const voters = players.map(p => p.id)
   const sim = new Map<string, number>()
 
   for (let i = 0; i < voters.length; i++) {
@@ -145,6 +144,9 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
     .slice()
     .sort((a,b)=>(b.cohesion-a.cohesion)||(b.members.length-a.members.length))[0]
 
+  // ---------- influence (PageRank-lite) ----------
+  const influence = computeInfluence(voters, edgeWeight)
+
   // ---------- bandwagon threshold ----------
   let maxPopularity=0
   targetPopularity.forEach(v=>{ if(v>maxPopularity) maxPopularity=v })
@@ -179,6 +181,7 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
     return{
       id:p.id,
       name:p.name,
+      influence: influence.get(p.id) ?? 0,
       alive:p.alive,
       seat:p.seat??null,
       round:input.round,
@@ -219,6 +222,7 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
     if(chaotic) z+=0.4
     if(bandwagon) z+=0.5
     z+=0.12*pp.out_degree
+    z+=0.8*(pp as any).influence ?? 0
     z-=0.06*pp.in_degree
 
     const suspicion=sigmoid(z)
@@ -290,4 +294,43 @@ function voteEntropy(voterId:string,votes:Array<{voter:{id:string},targets:Array
     h-=p*Math.log(p)
   })
   return h
+}
+
+function computeInfluence(players:string[], edgeWeight:Map<string,number>){
+
+  const N=players.length
+  const score=new Map<string,number>()
+
+  players.forEach(p=>score.set(p,1/N))
+
+  const ITER=20
+  const DAMP=0.85
+
+  for(let k=0;k<ITER;k++){
+
+    const next=new Map<string,number>()
+    players.forEach(p=>next.set(p,(1-DAMP)/N))
+
+    players.forEach(from=>{
+
+      let totalOut=0
+      players.forEach(to=>{
+        totalOut+=edgeWeight.get(`${from}->${to}`)??0
+      })
+
+      if(totalOut===0) return
+
+      players.forEach(to=>{
+        const w=edgeWeight.get(`${from}->${to}`)??0
+        if(!w) return
+
+        const contrib=DAMP*(score.get(from)!)*(w/totalOut)
+        next.set(to,next.get(to)!+contrib)
+      })
+    })
+
+    next.forEach((v,k)=>score.set(k,v))
+  }
+
+  return score
 }

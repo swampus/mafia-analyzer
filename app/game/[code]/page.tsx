@@ -220,6 +220,7 @@ export default function GamePage(){
                     <div>entropy: {p.entropy.toFixed(2)}</div>
                     <div>coalition: {p.coalition ?? "-"}</div>
                     <div>bandwagon: {(p.bandwagon_score*100).toFixed(0)}%</div>
+                    <div>influence: {p.influence.toFixed(3)}</div>
                   </div>
                 ))}
               </div>
@@ -236,7 +237,8 @@ export default function GamePage(){
                 <div><b>in_degree</b> — number of votes received.</div>
                 <div><b>entropy</b> — consistency of target selection.</div>
                 <div><b>coalition</b> — detected group with similar voting behavior.</div>
-                <div><b>bandwagon_score</b> — how often a player votes with the majority.</div>
+                bandwagon_score — how often a player votes with the majority.
+                influence — iterative graph-based influence score (PageRank-inspired), showing how strongly a player affects the voting network.
 
                 <hr/>
 
@@ -248,11 +250,13 @@ export default function GamePage(){
                     <li>Shannon entropy — O(V)</li>
                     <li>Bandwagon detection — O(V)</li>
                     <li>Logistic scoring model — O(N)</li>
+                    <li>Influence propagation (PageRank-lite) — O(k × N²)</li>
                   </ul>
                 </div>
 
                 <p className="opacity-70">
                   Suspicion is statistical, not proof.
+                   -> All analytics are computed in real time without external libraries.
                 </p>
               </div>
             )}
