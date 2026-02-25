@@ -53,9 +53,7 @@ export async function GET(
     : null
 
     return NextResponse.json({
-      code: game.code,
-      phase: game.phase,
-      round: game.round,
+      ...game,
       players,
       publicVotes,
       publicGraph,

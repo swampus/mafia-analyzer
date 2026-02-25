@@ -63,7 +63,7 @@ export default function HomePage() {
       <div className="grid md:grid-cols-3 gap-6 max-w-5xl w-full">
 
         <InfoCard
-          title="Designed for the Host v.0.5.8"
+          title="Designed for the Host v.0.6.0"
           text="Run the game smoothly — track roles, votes, rounds, and night actions. Players can optionally follow history and use analytical insights to understand game dynamics."
         />
 
