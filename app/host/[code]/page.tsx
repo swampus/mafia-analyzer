@@ -56,6 +56,7 @@ function VoteBox({ game, voter, code, adminFetch, load, activeRound }: any) {
               voterId:voter.id,
               targetIds:selected
             })
+            load()
         }}
         className={`px-3 py-2 rounded-xl text-sm ${
           disabled ? "bg-gray-200 text-gray-500" : "bg-black text-white"
@@ -92,27 +93,28 @@ const adminCode =
   const [viewRound,setViewRound] = useState(1)
   const [hideDead,setHideDead] = useState(false)
 
-async function load(){
+    async function load(){
 
-  const codeNow =
-    admin ||
-    localStorage.getItem("adminCode") ||
-    ""
+      const codeNow =
+        admin ||
+        localStorage.getItem("adminCode") ||
+        ""
 
-  const res = await fetch(
-    `/api/game/${code}?host=1&analytics=1`,
-    {
-      headers:{ "x-admin-code": codeNow }
+      const res = await fetch(
+        `/api/game/${code}?host=1&analytics=1`,
+        { headers:{ "x-admin-code": codeNow } }
+      )
+
+      if(!res.ok){
+        console.error("LOAD FAILED",await res.text())
+        return
+      }
+
+      const g = await res.json()
+
+      setGame(g)
+      setViewRound(g.round)   // ⭐ FIX
     }
-  )
-
-  if(!res.ok){
-    console.error("LOAD FAILED",await res.text())
-    return
-  }
-
-  setGame(await res.json())
-}
 
     async function adminFetch(url:string,body?:any){
 
@@ -131,7 +133,7 @@ async function load(){
       })
 
       if(!res.ok){
-        console.error("ADMIN FETCH FAILED:",url,await res.text())
+        console.error("ADMIN ERROR:",url,await res.text())
       }
 
       return res
