@@ -41,8 +41,7 @@ export async function GET(
     alive: p.alive,
     note: p.note,
     roleRevealed: p.roleRevealed,
-    // Never leak hidden roles to view-only clients.
-    role: p.roleRevealed ? p.role : null
+    role: p.role
   }))
 
   const analytics = analyticsFlag

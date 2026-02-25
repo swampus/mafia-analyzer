@@ -11,11 +11,12 @@ export default function GamePage(){
   const [roundView,setRoundView]=useState<number|null>(null)
   const [game,setGame]=useState<any>(null)
 
-  // 🔥 локальная история голосов — НЕ ТЕРЯЕТСЯ
+  const [tab,setTab]=useState<"friendly"|"pro">("friendly")
+
   const [allVotes,setAllVotes]=useState<any[]>([])
 
   async function load(){
-    const res=await fetch(`/api/game/${code}`)
+    const res=await fetch(`/api/game/${code}?analytics=1`)
     if(res.ok){
 
       const g=await res.json()
@@ -149,6 +150,88 @@ export default function GamePage(){
             <VoteGraph game={game} votes={allVotes} round={activeRound}/>
 
           </div>
+        )}
+
+        {game.analytics && (
+
+          <div className={`rounded-2xl border p-4 mt-4 ${
+            game.phase==="night"
+              ? "bg-slate-800 border-slate-700"
+              : "bg-white"
+          }`}>
+
+            <div className="flex gap-2 mb-3">
+              <button
+                onClick={()=>setTab("friendly")}
+                className={`px-3 py-1 rounded-lg border ${
+                  tab==="friendly"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                User friendly
+              </button>
+
+              <button
+                onClick={()=>setTab("pro")}
+                className={`px-3 py-1 rounded-lg border ${
+                  tab==="pro"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                Pro analytics
+              </button>
+            </div>
+
+            {tab==="friendly" && (
+
+              <div className="flex flex-col gap-2">
+
+                {game.analytics.friendly.players.map((p:any)=>(
+
+                  <div key={p.id} className="border rounded-lg p-2">
+
+                    <div className="font-semibold">
+                      {p.name} — {p.suspicion_pct}% suspicious
+                    </div>
+
+                    <div className="text-sm opacity-70">
+                      {p.reasons.join(", ")}
+                    </div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            )}
+
+            {tab==="pro" && (
+
+              <div className="text-sm">
+
+                {game.analytics.pro.players.map((p:any)=>(
+
+                  <div key={p.id} className="border rounded-lg p-2 mb-1">
+
+                    <b>{p.name}</b>
+                    <div>out_degree: {p.out_degree}</div>
+                    <div>in_degree: {p.in_degree}</div>
+                    <div>entropy: {p.entropy.toFixed(2)}</div>
+                    <div>coalition: {p.coalition ?? "-"}</div>
+
+                  </div>
+
+                ))}
+
+              </div>
+
+            )}
+
+          </div>
+
         )}
 
       </div>
