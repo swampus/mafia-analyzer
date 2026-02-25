@@ -6,12 +6,12 @@ import { Network } from "vis-network"
 
 export default function GamePage(){
 
-  const {code}=useParams()
+  const code = Array.isArray(params.code) ? params.code[0] : params.code
 
   const [roundView,setRoundView]=useState<number|null>(null)
   const [game,setGame]=useState<any>(null)
 
-  const [tab,setTab]=useState<"friendly"|"pro">("friendly")
+  const [tab,setTab]=useState<"friendly"|"pro"|"about">("friendly")
 
   const [allVotes,setAllVotes]=useState<any[]>([])
 
@@ -182,58 +182,84 @@ export default function GamePage(){
               >
                 Pro analytics
               </button>
+
+              <button
+                onClick={()=>setTab("about")}
+                className={`px-3 py-1 rounded-lg border ${
+                  tab==="about"
+                    ? "bg-blue-600 text-white"
+                    : "bg-white text-black"
+                }`}
+              >
+                How it works
+              </button>
             </div>
 
             {tab==="friendly" && (
-
               <div className="flex flex-col gap-2">
-
                 {game.analytics.friendly.players.map((p:any)=>(
-
                   <div key={p.id} className="border rounded-lg p-2">
-
                     <div className="font-semibold">
                       {p.name} — {p.suspicion_pct}% suspicious
                     </div>
-
                     <div className="text-sm opacity-70">
                       {p.reasons.join(", ")}
                     </div>
-
                   </div>
-
                 ))}
-
               </div>
-
             )}
 
             {tab==="pro" && (
-
               <div className="text-sm">
-
                 {game.analytics.pro.players.map((p:any)=>(
-
                   <div key={p.id} className="border rounded-lg p-2 mb-1">
-
                     <b>{p.name}</b>
                     <div>out_degree: {p.out_degree}</div>
                     <div>in_degree: {p.in_degree}</div>
                     <div>entropy: {p.entropy.toFixed(2)}</div>
                     <div>coalition: {p.coalition ?? "-"}</div>
-
+                    <div>bandwagon: {(p.bandwagon_score*100).toFixed(0)}%</div>
                   </div>
-
                 ))}
-
               </div>
+            )}
 
+            {tab==="about" && (
+              <div className="text-sm space-y-3">
+                <p>
+                  This tool analyzes the voting graph of the game to detect behavioral patterns,
+                  possible coalitions, and suspicious activity.
+                </p>
+
+                <div><b>out_degree</b> — number of votes made by a player.</div>
+                <div><b>in_degree</b> — number of votes received.</div>
+                <div><b>entropy</b> — consistency of target selection.</div>
+                <div><b>coalition</b> — detected group with similar voting behavior.</div>
+                <div><b>bandwagon_score</b> — how often a player votes with the majority.</div>
+
+                <hr/>
+
+                <div>
+                  <b>Algorithms:</b>
+                  <ul className="list-disc ml-5">
+                    <li>Jaccard similarity — O(N² × T)</li>
+                    <li>Graph component detection (BFS) — O(N + E)</li>
+                    <li>Shannon entropy — O(V)</li>
+                    <li>Bandwagon detection — O(V)</li>
+                    <li>Logistic scoring model — O(N)</li>
+                  </ul>
+                </div>
+
+                <p className="opacity-70">
+                  Suspicion is statistical, not proof.
+                </p>
+              </div>
             )}
 
           </div>
 
         )}
-
       </div>
 
     </main>
@@ -299,6 +325,12 @@ function VoteGraph({game,votes,round}:{game:any,votes:any[],round:number}){
     }
 
   },[game,votes,round])
+
+    useEffect(()=>{
+      if(game?.analytics){
+        setTab("friendly")
+      }
+    },[game?.analytics])
 
   return <div ref={containerRef}/>
 }
