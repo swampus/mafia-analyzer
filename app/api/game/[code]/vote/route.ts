@@ -8,6 +8,9 @@ export async function POST(
   { params }:{ params:{ code:string } }
 ){
 
+  console.log("ADMIN HEADER:", req.headers.get("x-admin-code"))
+  console.log("GAME ADMIN:", game.adminCode)
+
   const game:any = await loadGame(params.code)
 
   if(!game){

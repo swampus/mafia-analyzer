@@ -10,23 +10,19 @@ export async function POST(
   req: Request,
   { params }: { params: { code: string } }
 ) {
+  const game: any = await loadGame(params.code)
 
-  if(!(await rateLimit("end:"+params.code,20,60))){
-    return NextResponse.json({error:"Too many requests"}, {status:429})
+  if(!(await rateLimit("join:"+params.code,50,600))){
+      return NextResponse.json({error:"Too many joins"}, {status:429})
   }
 
-  const game:any = await loadGame(params.code)
-
-  if (!game){
-    return NextResponse.json({ error: "Game not found" }, { status: 404 })
+  if (game.endedAt) {
+    return NextResponse.json({ error: "Game ended (read-only)" }, { status: 400 })
   }
+  if (!game) return NextResponse.json({ error: "Game not found" }, { status: 404 })
 
   const unauthorized = requireAdmin(req, game)
   if (unauthorized) return unauthorized
-
-  if (game.endedAt){
-    return NextResponse.json({ ok: true }) // idempotent end
-  }
 
   game.endedAt = Date.now()
   game.status = "ended"
