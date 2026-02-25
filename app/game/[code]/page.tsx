@@ -256,7 +256,7 @@ export default function GamePage(){
 
                 <p className="opacity-70">
                   Suspicion is statistical, not proof.
-                   -> All analytics are computed in real time without external libraries.
+                    All analytics are computed in real time without external libraries.
                 </p>
               </div>
             )}
