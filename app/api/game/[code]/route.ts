@@ -12,6 +12,8 @@ export async function GET(
   const url = new URL(req.url)
   const analyticsFlag = url.searchParams.get("analytics") === "1"
 
+  const isHost = url.searchParams.get("host") === "1"
+
   const roundRaw = url.searchParams.get("round")
   const roundParsed = roundRaw ? Number.parseInt(roundRaw, 10) : NaN
   const round = Number.isFinite(roundParsed) ? roundParsed : null
@@ -34,26 +36,29 @@ export async function GET(
   const publicVotes = buildPublicVotes(game)
   const publicGraph = buildPublicVoteGraph(game)
 
-    const safePlayers = (game.players ?? []).map((p:any) => ({
-      id: p.id,
-      name: p.name,
-      seat: p.seat,
-      alive: p.alive,
-      note: p.note,
-      roleRevealed: p.roleRevealed,
-      // Never leak hidden roles to view-only clients.
-      role: p.roleRevealed ? p.role : null
-    }))
+    const players = isHost
+      ? game.players
+      : (game.players ?? []).map((p:any) => ({
+          id: p.id,
+          name: p.name,
+          seat: p.seat,
+          alive: p.alive,
+          note: p.note,
+          roleRevealed: p.roleRevealed,
+          role: p.roleRevealed ? p.role : null
+        }))
 
   const analytics = analyticsFlag
     ? buildVoteAnalytics({ game, publicVotes, round })
     : null
 
-  return NextResponse.json({
-    ...game,
-    players: safePlayers,
-    publicVotes,
-    publicGraph,
-    analytics
-  })
+    return NextResponse.json({
+      code: game.code,
+      phase: game.phase,
+      round: game.round,
+      players,
+      publicVotes,
+      publicGraph,
+      analytics
+    })
 }
