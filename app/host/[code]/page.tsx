@@ -94,7 +94,7 @@ const adminCode =
   const [hideDead,setHideDead] = useState(false)
 
   async function load(){
-    const res = await fetch(`/api/game/${code}`,{
+    const res = await fetch(`/api/game/${code}?host=1&analytics=1`),{
       headers:{ "x-admin-code": adminCode }
     })
     if(res.ok) setGame(await res.json())
