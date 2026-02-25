@@ -52,11 +52,10 @@ function VoteBox({ game, voter, code, adminFetch, load, activeRound }: any) {
       <button
         disabled={disabled}
         onClick={async()=>{
-          await adminFetch(`/api/game/${code}/vote`,{
-            voterId:voter.id,
-            targetIds:selected
-          })
-          load()
+            await adminFetch(`/api/game/${code}/vote`,{
+              voterId:voter.id,
+              targetIds:selected
+            })
         }}
         className={`px-3 py-2 rounded-xl text-sm ${
           disabled ? "bg-gray-200 text-gray-500" : "bg-black text-white"
