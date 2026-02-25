@@ -34,15 +34,16 @@ export async function GET(
   const publicVotes = buildPublicVotes(game)
   const publicGraph = buildPublicVoteGraph(game)
 
-  const safePlayers = (game.players ?? []).map((p:any) => ({
-    id: p.id,
-    name: p.name,
-    seat: p.seat,
-    alive: p.alive,
-    note: p.note,
-    roleRevealed: p.roleRevealed,
-    role: p.role
-  }))
+    const safePlayers = (game.players ?? []).map((p:any) => ({
+      id: p.id,
+      name: p.name,
+      seat: p.seat,
+      alive: p.alive,
+      note: p.note,
+      roleRevealed: p.roleRevealed,
+      // Never leak hidden roles to view-only clients.
+      role: p.roleRevealed ? p.role : null
+    }))
 
   const analytics = analyticsFlag
     ? buildVoteAnalytics({ game, publicVotes, round })
