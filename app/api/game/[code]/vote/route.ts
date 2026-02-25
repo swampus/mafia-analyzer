@@ -8,30 +8,30 @@ export async function POST(
   { params }:{ params:{ code:string } }
 ){
 
-  console.log("ADMIN HEADER:", req.headers.get("x-admin-code"))
-  console.log("GAME ADMIN:", game.adminCode)
-
   const game:any = await loadGame(params.code)
+
+  console.log("ADMIN HEADER:", req.headers.get("x-admin-code"))
+  console.log("GAME ADMIN:", game?.adminCode)
 
   if(!game){
     return NextResponse.json({error:"Game not found"},{status:404})
   }
 
-  // ✅ ADMIN CHECK
+  // ADMIN CHECK
   const unauthorized = requireAdmin(req,game)
   if(unauthorized) return unauthorized
 
-  // ✅ RATE LIMIT
-const ip =
- req.headers.get("x-real-ip")
- ?? req.headers.get("x-forwarded-for")?.split(",")[0]
- ?? "unknown"
+  // RATE LIMIT
+  const ip =
+    req.headers.get("x-real-ip")
+    ?? req.headers.get("x-forwarded-for")?.split(",")[0]
+    ?? "unknown"
 
   if(!(await rateLimit("vote:"+params.code+":"+ip,40,60))){
     return NextResponse.json({error:"Too many votes"},{status:429})
   }
 
-  // ✅ READ BODY SAFE
+  // BODY
   let body:any={}
   try{
     body = await req.json()
@@ -49,13 +49,11 @@ const ip =
     )
   }
 
-  // ✅ validate voter exists
   const voter = game.players?.find((p:any)=>p.id===voterId)
   if(!voter){
     return NextResponse.json({error:"Invalid voter"},{status:400})
   }
 
-  // ✅ validate targets exist
   for(const id of targetIds){
     if(!game.players.find((p:any)=>p.id===id)){
       return NextResponse.json({error:"Invalid target"}, {status:400})
@@ -64,12 +62,10 @@ const ip =
 
   game.votes ??=[]
 
-  // remove previous vote this round
   game.votes = game.votes.filter(
     (v:any)=>!(v.voterId===voterId && v.round===game.round)
   )
 
-  // add new vote
   game.votes.push({
     voterId,
     targetIds,
