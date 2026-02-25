@@ -283,11 +283,14 @@ function voteEntropy(voterId: string, votes: Array<{ voter: { id: string }, targ
       total++
     }
   }
-  if (total <= 1) return 0
-  let h = 0
-  for (const c of counts.values()) {
-    const p = c / total
-    h -= p * Math.log(p)
-  }
-  return h
+
+    if (total <= 1) return 0
+    let h = 0
+
+    counts.forEach((c) => {
+      const p = c / total
+      h -= p * Math.log(p)
+    })
+
+    return h
 }
