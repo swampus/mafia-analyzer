@@ -93,12 +93,16 @@ const adminCode =
   const [viewRound,setViewRound] = useState(1)
   const [hideDead,setHideDead] = useState(false)
 
-  async function load(){
-    const res = await fetch(`/api/game/${code}?host=1&analytics=1`),{
-      headers:{ "x-admin-code": adminCode }
-    })
-    if(res.ok) setGame(await res.json())
-  }
+async function load(){
+  const res = await fetch(
+    `/api/game/${code}?host=1&analytics=1`,
+    {
+      headers: { "x-admin-code": adminCode }
+    }
+  )
+
+  if(res.ok) setGame(await res.json())
+}
 
   async function adminFetch(url:string,body?:any){
     await fetch(url,{
