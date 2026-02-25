@@ -237,8 +237,8 @@ export default function GamePage(){
                 <div><b>in_degree</b> — number of votes received.</div>
                 <div><b>entropy</b> — consistency of target selection.</div>
                 <div><b>coalition</b> — detected group with similar voting behavior.</div>
-                bandwagon_score — how often a player votes with the majority.
-                influence — iterative graph-based influence score (PageRank-inspired), showing how strongly a player affects the voting network.
+                <div><b>bandwagon_score</b> — how often a player votes with the majority.</div>
+                <div><b>influence</b> — iterative graph-based influence score (PageRank-inspired), showing how strongly a player affects the voting network.</div>
 
                 <hr/>
 
