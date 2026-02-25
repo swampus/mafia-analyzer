@@ -115,16 +115,28 @@ async function load(){
   setGame(await res.json())
 }
 
-  async function adminFetch(url:string,body?:any){
-    await fetch(url,{
-      method:"POST",
-      headers:{
-        "Content-Type":"application/json",
-        "x-admin-code": adminCode
-      },
-      body: body ? JSON.stringify(body) : "{}"
-    })
-  }
+    async function adminFetch(url:string,body?:any){
+
+      const codeNow =
+        admin ||
+        localStorage.getItem("adminCode") ||
+        ""
+
+      const res = await fetch(url,{
+        method:"POST",
+        headers:{
+          "Content-Type":"application/json",
+          "x-admin-code": codeNow
+        },
+        body: body ? JSON.stringify(body) : "{}"
+      })
+
+      if(!res.ok){
+        console.error("ADMIN FETCH FAILED:",url,await res.text())
+      }
+
+      return res
+    }
 
 async function addPlayer(){
 
