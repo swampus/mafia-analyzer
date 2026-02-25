@@ -47,6 +47,12 @@ export default function GamePage(){
     return ()=>clearInterval(i)
   },[])
 
+    useEffect(()=>{
+        if(game?.analytics){
+          setTab("friendly")
+        }
+      },[game?.analytics])
+
   if(!game) return <div className="p-6">Loading...</div>
 
   const activeRound = roundView ?? game.round ?? 1
@@ -325,12 +331,6 @@ function VoteGraph({game,votes,round}:{game:any,votes:any[],round:number}){
     }
 
   },[game,votes,round])
-
-    useEffect(()=>{
-      if(game?.analytics){
-        setTab("friendly")
-      }
-    },[game?.analytics])
 
   return <div ref={containerRef}/>
 }
