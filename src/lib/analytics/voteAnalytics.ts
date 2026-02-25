@@ -56,14 +56,18 @@ export function buildVoteAnalytics(input: VoteAnalyticsInput) {
   }
 
   // --- Similarity matrix (Jaccard) between voters
-  const jaccard = (a: Set<string>, b: Set<string>) => {
-    if (a.size === 0 && b.size === 0) return 1
-    if (a.size === 0 || b.size === 0) return 0
-    let inter = 0
-    for (const x of a) if (b.has(x)) inter++
-    const uni = a.size + b.size - inter
-    return uni === 0 ? 0 : inter / uni
-  }
+    const jaccard = (a: Set<string>, b: Set<string>) => {
+      if (a.size === 0 && b.size === 0) return 1
+      if (a.size === 0 || b.size === 0) return 0
+
+      let inter = 0
+      a.forEach(x => {
+        if (b.has(x)) inter++
+      })
+
+      const uni = a.size + b.size - inter
+      return uni === 0 ? 0 : inter / uni
+    }
 
   const voters = players.map(p => p.id)
   const sim = new Map<string, number>()
