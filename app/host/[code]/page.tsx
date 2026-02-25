@@ -94,14 +94,25 @@ const adminCode =
   const [hideDead,setHideDead] = useState(false)
 
 async function load(){
+
+  const codeNow =
+    admin ||
+    localStorage.getItem("adminCode") ||
+    ""
+
   const res = await fetch(
     `/api/game/${code}?host=1&analytics=1`,
     {
-      headers: { "x-admin-code": adminCode }
+      headers:{ "x-admin-code": codeNow }
     }
   )
 
-  if(res.ok) setGame(await res.json())
+  if(!res.ok){
+    console.error("LOAD FAILED",await res.text())
+    return
+  }
+
+  setGame(await res.json())
 }
 
   async function adminFetch(url:string,body?:any){
